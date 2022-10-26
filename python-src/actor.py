@@ -1,10 +1,10 @@
 class Actor:
-    def __init__(self, filmer:list, navn:str, id:str) -> None:
-        self.filmer = filmer
-        self.navn = navn
+    def __init__(self, movies:list, name:str, id:str) -> None:
+        self.movies = movies
+        self.name = name
         self.id = id
 
     def __str__(self) -> str:
-        return f"{self.navn} filmer: {self.filmer}"
+        return f"{self.name}"
 
     
