@@ -3,7 +3,7 @@ class Actor:
         self.movies = movies
         self.name = name
         self.id = id
-
+        self.forrige = None #Getting a feeling this is wrong, but i love technical debt<3
     def __str__(self) -> str:
         return f"{self.name}"
 

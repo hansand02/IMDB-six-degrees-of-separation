@@ -1,16 +1,13 @@
+from importlib.resources import path
+from platform import node
 from actor import Actor
 from movie import Movie
 from itertools import chain
 class Graph:
 
-
     def hentVerdier(self) -> tuple:
-        
-        def flatten_dict_values(dictionary):
-            return chain(*dictionary.values())
-        
-        return((len(list(flatten_dict_values(self.hovedGraf))))/2, len(self.hovedGraf.keys()))
-
+        return(int((len(list(chain(*self.hovedGraf.values()))))/2), len(self.hovedGraf.keys()))
+    
     def __init__(self) -> None:
         self.actorDict =  {}
         self.filmDict = {}
@@ -48,7 +45,7 @@ class Graph:
                     linjeL = linje.strip().split("\t")
                     self.filmDict[linjeL[0]] = Movie(linjeL[0], linjeL[1], float(linjeL[2]))
 
-    def lagGraf(self):
+    def lagGraf(self) -> None:
 
         self.hovedGraf = {k:[] for k in self.actorDict.values()}
         for movie in self.filmDict.values():
@@ -60,11 +57,40 @@ class Graph:
                 self.hovedGraf[actor] += filmListe
                 filmListe.append((actor, movie, movie.rating))
 
+    """ def BFSvisit(self, startNode:Actor, visited:list, sluttNode:Actor) -> None:
+        queue = [startNode] # Queue 
+        visited.append(startNode)
 
+        while queue:
+            nodeKey = queue.pop(0)
+            if nodeKey == sluttNode:
+                pathList = []
+                g = nodeKey
+                while g != None:
+                    pathList.insert(0,g)
+                    g = g.forrige
+                for actors in pathList:
+                    print(actors)
+                return
 
+            for naboer in self.hovedGraf[nodeKey]:
+                if naboer[0] not in visited:  
+                    naboer[0].forrige = nodeKey if naboer[0].forrige == None else None
+                    print(f"{naboer[0]} sin forrige er {nodeKey}")
+                    visited.append(naboer[0])
+                    queue.append(naboer[0])
 
-if __name__ == "__main__":
-    oppgave2 = Graph()
-    oppgave2.les("../data/movies.tsv", "../data/actors.tsv")
-    oppgave2.lagGraf()
-    print(oppgave2.hentVerdier())
+    def BFSfull(self, nmIdSlutt:str, nmIdStart:str):
+        visited = []
+
+        for actor in self.hovedGraf.keys():
+            if actor.id == nmIdSlutt:
+                sluttNode = actor
+                print("hei")
+            if actor.id == nmIdStart:
+                startNode = actor
+                print("HEi")
+
+        print("Start", startNode)
+        print("Slutt", sluttNode)
+        self.BFSvisit(startNode,visited,sluttNode) """
