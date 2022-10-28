@@ -57,10 +57,9 @@ class Graph:
                 self.hovedGraf[actor] += filmListe
                 filmListe.append((actor, movie, movie.rating))
 
-    """ def BFSvisit(self, startNode:Actor, visited:list, sluttNode:Actor) -> None:
+    def BFSvisit(self, startNode:Actor, visited:list, sluttNode:Actor) -> None:
         queue = [startNode] # Queue 
         visited.append(startNode)
-
         while queue:
             nodeKey = queue.pop(0)
             if nodeKey == sluttNode:
@@ -72,17 +71,15 @@ class Graph:
                 for actors in pathList:
                     print(actors)
                 return
-
             for naboer in self.hovedGraf[nodeKey]:
                 if naboer[0] not in visited:  
                     naboer[0].forrige = nodeKey if naboer[0].forrige == None else None
-                    print(f"{naboer[0]} sin forrige er {nodeKey}")
                     visited.append(naboer[0])
                     queue.append(naboer[0])
-
+        print("finnes ingen vei")
+        
     def BFSfull(self, nmIdSlutt:str, nmIdStart:str):
         visited = []
-
         for actor in self.hovedGraf.keys():
             if actor.id == nmIdSlutt:
                 sluttNode = actor
@@ -90,7 +87,6 @@ class Graph:
             if actor.id == nmIdStart:
                 startNode = actor
                 print("HEi")
-
         print("Start", startNode)
         print("Slutt", sluttNode)
-        self.BFSvisit(startNode,visited,sluttNode) """
+        self.BFSvisit(startNode,visited,sluttNode)
