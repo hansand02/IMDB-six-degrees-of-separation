@@ -4,6 +4,8 @@ class Actor:
         self.name = name
         self.id = id
         self.forrige = None #Getting a feeling this is wrong
+        self.visited = False
+        self.movieWithLast = None #On deep waters now
     def __str__(self) -> str:
         return f"{self.name}"
 

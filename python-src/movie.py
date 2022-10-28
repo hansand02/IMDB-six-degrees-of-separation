@@ -6,4 +6,4 @@ class Movie:
         self.actors = []
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.rating})"
+        return f"[{self.name} ({self.rating})]"

@@ -1,5 +1,6 @@
 from graph import Graph
 import timeit 
+import dis
 EXPECTEDVALUES = (5068918,119205)
 
 def sjekk(graf:Graph, verdier:tuple) -> bool:
@@ -7,11 +8,24 @@ def sjekk(graf:Graph, verdier:tuple) -> bool:
 
 if __name__ == "__main__":
     def arbeid() -> None:
-        print("Oppgave 1")
         oppgave2 = Graph()
-        oppgave2.les("../data/marvel_movies.tsv", "../data/marvel_actors.tsv")
-        oppgave2.lagGraf()
-        verdier = oppgave2.hentVerdier()
-        print(f"{sjekk(oppgave2, verdier)}, grafen er bygget riktig :=D \nNodes: {verdier[1]} \nEdges: {verdier[0]}")
-        oppgave2.BFSfull("nm0000375", "nm0339460")
-    print(f"{timeit.timeit(arbeid, number=1):.5f} sekunder for å bygge grafen")
+        
+        def bygg():
+            print("Oppgave 2\n")
+            oppgave2.les("../data/movies.tsv", "../data/actors.tsv")
+            oppgave2.lagGraf()
+        stringBygg = f"{timeit.timeit(bygg, number=1):.5f} to build graph"
+
+        def test():
+            verdier = oppgave2.hentVerdier()
+            print(f"\nNodes: {verdier[1]} \nEdges: {verdier[0]}")
+        stringTest = f"{timeit.timeit(test, number=1):.5f} to validate graph"
+
+        def search():
+            oppgave2.BFSfull("nm0031483","nm0931324")
+        stringSoek = f"{timeit.timeit(search, number=1):.5f} to search through graph"
+        
+        print(stringBygg + "\n" + stringTest + "\n" + stringSoek + "\n")
+    
+    print(f"{timeit.timeit(arbeid, number=1):.5f} total")
+    
