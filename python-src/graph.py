@@ -86,9 +86,14 @@ class Graph:
                 for actor in pathList:
                     spaces = int(len(actor.name)/2)
                     if indexOf(pathList, actor) == len(pathList)-1:
-                        print(" " *20 , actor)
-                        print("="* (21 + len(actor.name)))
-                        return
+                        if t%2 == 1:
+                            print(" " *20 , actor)
+                            print("="* (21 + len(actor.name)))
+                            return
+                        if t%1 == 0:
+                            print(actor)
+                            print("="* (21 + len(actor.name)))
+                            return
 
                     if t % 2 == 1:
                         print(" " *20 , actor)
