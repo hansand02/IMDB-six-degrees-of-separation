@@ -6,13 +6,20 @@ from itertools import chain
 from collections import deque
 class Graph:
 
-    def hentVerdier(self) -> tuple:
+
+    def kontrollerVerdier(self) -> tuple:
         return(int(len(list(chain(*self.hovedGraf.values())))/2), len(self.hovedGraf.keys()))
     
+    #Method for runtime optimalization
+    def hentVerdier(self) -> tuple:
+        return (int(self.kanter/2), self.noder)
+
     def __init__(self) -> None:
         self.actorDict =  {}
         self.filmDict = {}
         self.hovedGraf = None
+        self.kanter = 0
+        self.noder = 0
         
     def les(self, movies:str, actors:str) -> None:
         self.lesFilmer(movies)
@@ -25,6 +32,7 @@ class Graph:
         with open(filnavn) as fil:
             for linje in fil:
                 if linje:
+                    self.noder +=1
                     linjeL = linje.strip().split("\t") 
                     skuespiller = (Actor(linjeL[2:],linjeL[1],linjeL[0]))
                     self.actorDict[linjeL[0]] = skuespiller
@@ -56,6 +64,7 @@ class Graph:
             for actor in movie.actors:
                 filmListe.remove((actor, movie))
                 self.hovedGraf[actor] += filmListe
+                self.kanter += len(filmListe)
                 filmListe.append((actor, movie))
 
     # Tips for running time:
@@ -75,34 +84,35 @@ class Graph:
             #if statement for printing final path
             if nodeKey == sluttNode:
                 pathList = []
-                g = nodeKey
-                while g != None:
-                    pathList.insert(0,g)
-                    g = g.forrige
+                currentNode = nodeKey
+
+                #Build pathlist
+                while currentNode != None:
+                    pathList.insert(0,currentNode)
+                    currentNode = currentNode.forrige
                 
                 #Just a large clumsy graphical print section
-                t = 0
                 print("=" *35)
-                for actor in pathList:
+                for index, actor in enumerate(pathList):
+                    
                     spaces = int(len(actor.name)/2)
-                    if indexOf(pathList, actor) == len(pathList)-1:
-                        if t%2 == 1:
-                            print(" " *20 , actor)
-                            print("="* (21 + len(actor.name)))
-                            return
-                        if t%1 == 0:
-                            print(actor)
-                            print("="* (21 + len(actor.name)))
-                            return
+                    isRightSide = index%2 == 1
 
-                    if t % 2 == 1:
+                    if index == len(pathList)-1:
+                        if isRightSide:
+                            print(" " *20 , actor)
+                            return print("="* (21 + len(actor.name)))       
+                        if not isRightSide:
+                            print(actor)
+                            return print("="* (21 + len(actor.name)))         
+
+                    if isRightSide:
                         print(" " *20 , actor)
                         for i in range(0, 20, 2):
                             if i == 10:
                                 print(" "* (16-i+spaces-int(len(pathList[indexOf(pathList, actor)+1].movieWithLast.name)/2)), pathList[indexOf(pathList, actor)+1].movieWithLast)
                                 continue
-                            print(" "* (20-i) + " "*spaces + "/")
-                    
+                            print(" "* (20-i) + " "*spaces + "/")         
                     else:
                         print(actor)
                         for i in range(0, 20, 2):
@@ -110,8 +120,6 @@ class Graph:
                                 print(" "* (16-i+spaces-int(len(pathList[indexOf(pathList, actor)+1].movieWithLast.name)/2)), pathList[indexOf(pathList, actor)+1].movieWithLast)
                                 continue
                             print(" "*spaces + " "*i + "\\" )
-                    t += 1
-            
                 return
             #fi
             
@@ -121,16 +129,17 @@ class Graph:
                 if not naboer[0].visited: 
                     naboer[0].visited = True
                     naboer[0].forrige = nodeKey
-                    naboer[0].movieWithLast = naboer[1]
+                    naboer[0].movieWithLast = naboer[1] #For usage in resultprinting
                     queue.append(naboer[0])
         print("finnes ingen vei")
-    #This method makes sure alle nodeclusters are visited, (not yet)
+
     #As per now, this method finds the actual created actorobject from a given actorId.  
     def BFSfull(self,  nmIdStart:str,nmIdSlutt:str):
         
         for actor in self.hovedGraf.keys():
+            #Both if in case start and end is the same
             if actor.id == nmIdSlutt:
                 sluttNode = actor
             if actor.id == nmIdStart:
-                startNode = actor
+                startNode = actor 
         self.BFSvisit(startNode,sluttNode)
