@@ -103,6 +103,7 @@ class Graph:
     # around 0.4s (which gave 70% reduction in overall time for BFSfull and dijsktraSearch()
     def resettGraf(self):
         self.currentVisitBoolean = not self.currentVisitBoolean
+
     
     def lagActorFraId(self, nmIdStart:str,nmIdSlutt:str) -> tuple:
         for actor in self.hovedGraf.keys():
@@ -153,100 +154,44 @@ class Graph:
                         queue.append(naboer[0])
             print("finnes ingen vei")
 
-    def dijkstraSearch(self, nmIdStart:str, nmIdSlutt:str) -> None:
-        
-        tuple = self.lagActorFraId(nmIdStart, nmIdSlutt)
-        startNode, sluttNode = tuple[0], tuple[1]
-        
-        #Making a 2d list/deque, with index equal to 10*total weight of rating
-        #Considering everything is supposed to be within six steps, and the worst
-        #possible rating is 10-0.1 = 9.9, 610 will be sufficient
-        queue = [deque() for i in range(0,700)]
-
-        #This way we dont have to build the graph again, a lot of nodes have forrige pointers if any of the 
-        #Search methods have been ran, by doing this we avoid an infinite loop. 
-        #Would not recomend as best practice.. 
-        startNode.visited, startNode.forrige, startNode.totalWeight = self.currentVisitBoolean, None, 0
-        queue[0].append(startNode)
-
-        #While queue is not empty
-        while any(queue):
-            
-            #Remove first item
-            for dq in queue:
-                if dq:
-                    popNode = dq.popleft()
-                    break
-            
-            #if statement for creating final path
-            if popNode == sluttNode:
-                pathList = []
-                currentNode = popNode
-                #Build pathlist
-                while currentNode != None:
-                    pathList.insert(0,currentNode)
-                    currentNode = currentNode.forrige
-                self.printGrafSti(pathList)
-                self.resettGraf()
-                print(f"Total weight: {popNode.totalWeight}\n")
-                return
-
-            #fi
-            #Visits alle the neighbours of the node that was just removed from the queue, and places the unvisited
-            # neighbours on the back of the deque    
-            for naboer in self.hovedGraf[popNode]:
-                if  naboer[0].visited != self.currentVisitBoolean: 
-                    naboer[0].totalWeight = round(popNode.totalWeight + (10-naboer[1].rating), 1)  #Have to add this because python cant do 1.6 + 2.7 correct....
-                    naboer[0].visited = self.currentVisitBoolean
-                    naboer[0].forrige = popNode
-                    naboer[0].movieWithLast = naboer[1] #For usage in resultprinting
-                    queue[int((naboer[0].totalWeight)*10)].append(naboer[0])   
-
-        print("no possible way")
-        
+    
     def nyDijkstra(self, nmIdStart:str, nmIdSlutt:str) -> None:
         
         actors = self.lagActorFraId(nmIdStart, nmIdSlutt)
         startNode, sluttNode = actors[0],actors[1]
-        startNode.visited, startNode.forrige, startNode.totalWeight = self.currentVisitBoolean, None, 0
-
+        startNode.visited, startNode.forrige, startNode.totalWeight, sluttNode.totalWeight = self.currentVisitBoolean, None, 0, 10
         que = deque()
         priorityuQue = [deque() for i in range(610)]
         que.append(startNode)
         priorityuQue[0].append(startNode)
-        teller = 0
 
-        while True:
-            
-            if teller >= len(que):
-                break
-            poppetNode = que[teller]
+        
+        while len(que) > 0:
+
+            poppetNode = que.popleft()
+            if poppetNode.totalWeight + 0.8 > sluttNode.totalWeight:
+                continue
 
             for tuples in self.hovedGraf[poppetNode]:
-            
+                
                 if tuples[0].totalWeight > poppetNode.totalWeight + (10-tuples[1].rating):
-                    tuples[0].totalWeight = round(poppetNode.totalWeight + (10-tuples[1].rating), 1)  #Have to add this because python cant do 1.6 + 2.7 correct....
-                    tuples[0].forrige = poppetNode
-                    tuples[0].movieWithLast = tuples[1]    
-                    tuples[0].visited = self.currentVisitBoolean       
-                    que.append(tuples[0])
-                    priorityuQue[int((tuples[0].totalWeight)*10)].append(tuples[0])
-            teller +=1
+                    kopi = tuples[0]
+                    kopi.totalWeight = round(poppetNode.totalWeight + (10-tuples[1].rating), 1)  #Have to add this because python cant do 1.6 + 2.7 correct....
+                    kopi.forrige = poppetNode
+                    kopi.movieWithLast = tuples[1]    
+                    kopi.visited = self.currentVisitBoolean       
+                    que.append(kopi)
+                    priorityuQue[int((kopi.totalWeight)*10)].append(kopi)
 
-        
         #Sjekk <3  
-        
         while any(priorityuQue):
             #Remove first item
             for dq in priorityuQue:
                 if dq:
                     popNode = dq.popleft()
                     break
-            
-            
-            #if statement for creating final path
+        
             if popNode == sluttNode:
-                print(sluttNode.totalWeight)
                 pathList = []
                 currentNode = popNode
                 #Build pathlist
@@ -258,6 +203,7 @@ class Graph:
                 self.resettGraf()
                 print(f"Total weight: {popNode.totalWeight}\n")
                 return
+            
 
 
 

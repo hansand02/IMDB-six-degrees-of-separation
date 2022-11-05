@@ -19,7 +19,7 @@ if __name__ == "__main__":
             oppgave2.lagGraf()
         
         def Hjelpefunksjon():
-            input("\nKlar for å se oppgave 1?")
+            print(input("\nKlar for å se oppgave 1?"))
             print("Oppgave 1\n")
             stringBygg = f"{timeit.timeit(bygg, number=1):.5f}s to build graph"
             stringTest = f"{timeit.timeit(test, number=1):.5f}s to validate graph"
@@ -36,25 +36,25 @@ if __name__ == "__main__":
         def test():
             verdier = oppgave2.hentVerdier()
             print(f"Nodes: {verdier[1]} \nEdges: {verdier[0]}")
-            #assert verdier == EXPECTEDVALUES
+            assert verdier == EXPECTEDVALUES
             
         
         def searchUnweighted():
-            oppgave2.BFSfull("nm2255973","nm0000460")  
+            """ oppgave2.BFSfull("nm2255973","nm0000460")  
             oppgave2.BFSfull("nm0424060","nm0000243")  
             oppgave2.BFSfull("nm4689420","nm0000365")  
             oppgave2.BFSfull("nm0000288","nm0001401")  
-            oppgave2.BFSfull("nm0031483","nm0931324")  
+            oppgave2.BFSfull("nm0031483","nm0931324") """  
+            pass
 
         def searchWeighted(): 
+            
             oppgave2.nyDijkstra("nm2255973","nm0000460")  
             oppgave2.nyDijkstra("nm0424060","nm0000243")  
             oppgave2.nyDijkstra("nm4689420","nm0000365")  
-            oppgave2.nyDijkstra("nm0000288","nm0001401")  
+            oppgave2.nyDijkstra("nm0000288","nm0001401") 
             oppgave2.nyDijkstra("nm0031483","nm0931324")  
-            
-            
-        
+             
         #print(stringBygg + "\n" + stringTest + "\n" + stringSearch + "\n" + stringSearchWeighted +"\n")
         Hjelpefunksjon()
     stringTotal = (f"{timeit.timeit(arbeid, number=1):.5f}s total")
