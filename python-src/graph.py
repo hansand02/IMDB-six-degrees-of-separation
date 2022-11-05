@@ -4,8 +4,8 @@ from actor import Actor
 from movie import Movie
 from itertools import chain
 from collections import deque
+import time  
 class Graph:
-
 
     def kontrollerVerdier(self) -> tuple:
         return(int(len(list(chain(*self.hovedGraf.values())))/2), len(self.hovedGraf.keys()))
@@ -17,16 +17,17 @@ class Graph:
     def __init__(self) -> None:
         self.actorDict =  {}
         self.filmDict = {}
-        self.hovedGraf = None
+        self.hovedGraf = {}
         self.kanter = 0
         self.noder = 0
+        self.currentVisitBoolean = True
         
     def les(self, movies:str, actors:str) -> None:
         self.lesFilmer(movies)
         self.lesActors(actors)
          
     def lesActors(self, filnavn: str) -> dict:
-        #self.actorDict becomes k,v = actorId, ActorObject
+        #self.actorDict becomes key, value = actorId, ActorObject
         #Open file, read actors by id, name and movies played in
         #Create new Actor object from this, iterate over all movies played in, and add this object in the actors list in Movie. 
         with open(filnavn) as fil:
@@ -42,12 +43,12 @@ class Graph:
                             self.filmDict[title].actors.append(skuespiller)
 
     def lesFilmer(self, filnavn: str) -> dict:
-        #makes self.filmDict a dictionary k,v = movieId, MovieObject
+        #creates self.filmDict a dictionary key,value = movieId, MovieObject
         try:
             assert len(self.actorDict) == 0
         except: 
             print("lesActors must be run befor lesFilmer")
-
+    
         with open(filnavn, 'r') as fil:
             for linje in fil:
                 if linje:
@@ -55,7 +56,7 @@ class Graph:
                     self.filmDict[linjeL[0]] = Movie(linjeL[0], linjeL[1], float(linjeL[2]))
 
     def lagGraf(self) -> None:
-
+        #creates self.hovedGraf: key,value = ActorObject, ListOfTuples -> [(ActorObject, MovieObject), ..., ...,]
         self.hovedGraf = {k:[] for k in self.actorDict.values()}
         for movie in self.filmDict.values():
             filmListe = []
@@ -67,79 +68,200 @@ class Graph:
                 self.kanter += len(filmListe)
                 filmListe.append((actor, movie))
 
-    # Tips for running time:
-    # 1: Dont use "in" to check if node is visited O(n) complexity
-    # 2: Use deque and not list.pop(0) that is also O(n) complexity
-    def BFSvisit(self, startNode:Actor, sluttNode:Actor) -> None:
-        
-        queue = deque()
-        startNode.visited = True
-        queue.append(startNode)
-
-        #While queue is not empty
-        while len(queue) > 0:
-            #Remove first item
-            nodeKey = queue.popleft()
-
-            #if statement for printing final path
-            if nodeKey == sluttNode:
-                pathList = []
-                currentNode = nodeKey
-
-                #Build pathlist
-                while currentNode != None:
-                    pathList.insert(0,currentNode)
-                    currentNode = currentNode.forrige
-                
-                #Just a large clumsy graphical print section
-                print("=" *35)
-                for index, actor in enumerate(pathList):
-                    
-                    spaces = int(len(actor.name)/2)
-                    isRightSide = index%2 == 1
-
-                    if index == len(pathList)-1:
-                        if isRightSide:
-                            print(" " *20 , actor)
-                            return print("="* (21 + len(actor.name)))       
-                        if not isRightSide:
-                            print(actor)
-                            return print("="* (21 + len(actor.name)))         
-
-                    if isRightSide:
-                        print(" " *20 , actor)
-                        for i in range(0, 20, 2):
-                            if i == 10:
-                                print(" "* (16-i+spaces-int(len(pathList[indexOf(pathList, actor)+1].movieWithLast.name)/2)), pathList[indexOf(pathList, actor)+1].movieWithLast)
-                                continue
-                            print(" "* (20-i) + " "*spaces + "/")         
-                    else:
-                        print(actor)
-                        for i in range(0, 20, 2):
-                            if i == 10:
-                                print(" "* (16-i+spaces-int(len(pathList[indexOf(pathList, actor)+1].movieWithLast.name)/2)), pathList[indexOf(pathList, actor)+1].movieWithLast)
-                                continue
-                            print(" "*spaces + " "*i + "\\" )
-                return
-            #fi
+    def printGrafSti(self, pathList:list) -> None:
+        print("=" *35)
+        for index, actor in enumerate(pathList):
             
-            #Visits alle the neighbours of the node that was just removed from the queue, and places the unvisited
-            # neighbours on the back of the deque    
-            for naboer in self.hovedGraf[nodeKey]:
-                if not naboer[0].visited: 
-                    naboer[0].visited = True
-                    naboer[0].forrige = nodeKey
-                    naboer[0].movieWithLast = naboer[1] #For usage in resultprinting
-                    queue.append(naboer[0])
-        print("finnes ingen vei")
+            spaces = int(len(actor.name)/2)
+            isRightSide = index%2 == 1
 
-    #As per now, this method finds the actual created actorobject from a given actorId.  
-    def BFSfull(self,  nmIdStart:str,nmIdSlutt:str):
-        
+            if index == len(pathList)-1:
+                if isRightSide:
+                    print(" " *20 , actor, actor.totalWeight)
+                    return print("="* (21 + len(actor.name)))       
+                if not isRightSide:
+                    print(actor, actor.totalWeight)
+                    return print("="* (21 + len(actor.name)))         
+
+            if isRightSide:
+                print(" " *20 , actor, actor.totalWeight)
+                for i in range(0, 20, 2):
+                    if i == 10:
+                        print(" "* (16-i+spaces-int(len(pathList[indexOf(pathList, actor)+1].movieWithLast.name)/2)), pathList[indexOf(pathList, actor)+1].movieWithLast)
+                        continue
+                    print(" "* (20-i) + " "*spaces + "/")         
+            else:
+                print(actor, actor.totalWeight)
+                for i in range(0, 20, 2):
+                    if i == 10:
+                        print(" "* (16-i+spaces-int(len(pathList[indexOf(pathList, actor)+1].movieWithLast.name)/2)), pathList[indexOf(pathList, actor)+1].movieWithLast)
+                        continue
+                    print(" "*spaces + " "*i + "\\" )
+    
+    #Makes it possible to search again without building graph again
+    #Originally changed all visited to True, however flipping of the global boolean saves a lot of time:
+    # around 0.4s (which gave 70% reduction in overall time for BFSfull and dijsktraSearch()
+    def resettGraf(self):
+        self.currentVisitBoolean = not self.currentVisitBoolean
+    
+    def lagActorFraId(self, nmIdStart:str,nmIdSlutt:str) -> tuple:
         for actor in self.hovedGraf.keys():
             #Both if in case start and end is the same
             if actor.id == nmIdSlutt:
                 sluttNode = actor
             if actor.id == nmIdStart:
                 startNode = actor 
-        self.BFSvisit(startNode,sluttNode)
+        return (startNode, sluttNode)
+    
+    #This method does the unwegihted BFS search (OPPGAVE 2)
+    def BFSfull(self,  nmIdStart:str,nmIdSlutt:str):
+        
+            tuple = self.lagActorFraId(nmIdStart, nmIdSlutt)
+            startNode, sluttNode = tuple[0], tuple[1]
+            queue = deque()
+            startNode.visited = self.currentVisitBoolean
+            startNode.forrige = None
+            queue.append(startNode)
+
+            #While queue is not empty
+            while len(queue) > 0:
+                #Remove first item
+                nodeKey = queue.popleft()
+
+                #if statement for creating final path
+                if nodeKey == sluttNode:
+                    pathList = []
+                    currentNode = nodeKey
+
+                    #Build pathlist
+                    while currentNode != None:
+                        pathList.insert(0,currentNode)
+                        currentNode = currentNode.forrige
+    
+                    self.printGrafSti(pathList)
+                    self.resettGraf()
+                    return
+                #fi
+                
+                #Visits alle the neighbours of the node that was just removed from the queue, and places the unvisited
+                # neighbours on the back of the deque    
+                for naboer in self.hovedGraf[nodeKey]:
+                    if not naboer[0].visited == self.currentVisitBoolean: 
+                        naboer[0].visited = self.currentVisitBoolean
+                        naboer[0].forrige = nodeKey
+                        naboer[0].movieWithLast = naboer[1] #For usage in resultprinting
+                        queue.append(naboer[0])
+            print("finnes ingen vei")
+
+    def dijkstraSearch(self, nmIdStart:str, nmIdSlutt:str) -> None:
+        
+        tuple = self.lagActorFraId(nmIdStart, nmIdSlutt)
+        startNode, sluttNode = tuple[0], tuple[1]
+        
+        #Making a 2d list/deque, with index equal to 10*total weight of rating
+        #Considering everything is supposed to be within six steps, and the worst
+        #possible rating is 10-0.1 = 9.9, 610 will be sufficient
+        queue = [deque() for i in range(0,700)]
+
+        #This way we dont have to build the graph again, a lot of nodes have forrige pointers if any of the 
+        #Search methods have been ran, by doing this we avoid an infinite loop. 
+        #Would not recomend as best practice.. 
+        startNode.visited, startNode.forrige, startNode.totalWeight = self.currentVisitBoolean, None, 0
+        queue[0].append(startNode)
+
+        #While queue is not empty
+        while any(queue):
+            
+            #Remove first item
+            for dq in queue:
+                if dq:
+                    popNode = dq.popleft()
+                    break
+            
+            #if statement for creating final path
+            if popNode == sluttNode:
+                pathList = []
+                currentNode = popNode
+                #Build pathlist
+                while currentNode != None:
+                    pathList.insert(0,currentNode)
+                    currentNode = currentNode.forrige
+                self.printGrafSti(pathList)
+                self.resettGraf()
+                print(f"Total weight: {popNode.totalWeight}\n")
+                return
+
+            #fi
+            #Visits alle the neighbours of the node that was just removed from the queue, and places the unvisited
+            # neighbours on the back of the deque    
+            for naboer in self.hovedGraf[popNode]:
+                if  naboer[0].visited != self.currentVisitBoolean: 
+                    naboer[0].totalWeight = round(popNode.totalWeight + (10-naboer[1].rating), 1)  #Have to add this because python cant do 1.6 + 2.7 correct....
+                    naboer[0].visited = self.currentVisitBoolean
+                    naboer[0].forrige = popNode
+                    naboer[0].movieWithLast = naboer[1] #For usage in resultprinting
+                    queue[int((naboer[0].totalWeight)*10)].append(naboer[0])   
+
+        print("no possible way")
+        
+    def nyDijkstra(self, nmIdStart:str, nmIdSlutt:str) -> None:
+        
+        actors = self.lagActorFraId(nmIdStart, nmIdSlutt)
+        startNode, sluttNode = actors[0],actors[1]
+        startNode.visited, startNode.forrige, startNode.totalWeight = self.currentVisitBoolean, None, 0
+
+        que = deque()
+        priorityuQue = [deque() for i in range(610)]
+        que.append(startNode)
+        priorityuQue[0].append(startNode)
+        teller = 0
+
+        while True:
+            
+            if teller >= len(que):
+                break
+            poppetNode = que[teller]
+
+            for tuples in self.hovedGraf[poppetNode]:
+            
+                if tuples[0].totalWeight > poppetNode.totalWeight + (10-tuples[1].rating):
+                    tuples[0].totalWeight = round(poppetNode.totalWeight + (10-tuples[1].rating), 1)  #Have to add this because python cant do 1.6 + 2.7 correct....
+                    tuples[0].forrige = poppetNode
+                    tuples[0].movieWithLast = tuples[1]    
+                    tuples[0].visited = self.currentVisitBoolean       
+                    que.append(tuples[0])
+                    priorityuQue[int((tuples[0].totalWeight)*10)].append(tuples[0])
+            teller +=1
+
+        
+        #Sjekk <3  
+        
+        while any(priorityuQue):
+            #Remove first item
+            for dq in priorityuQue:
+                if dq:
+                    popNode = dq.popleft()
+                    break
+            
+            
+            #if statement for creating final path
+            if popNode == sluttNode:
+                print(sluttNode.totalWeight)
+                pathList = []
+                currentNode = popNode
+                #Build pathlist
+                while currentNode != None:
+                    pathList.insert(0,currentNode)
+                    currentNode = currentNode.forrige
+
+                self.printGrafSti(pathList)
+                self.resettGraf()
+                print(f"Total weight: {popNode.totalWeight}\n")
+                return
+
+
+
+
+        
+
+            
