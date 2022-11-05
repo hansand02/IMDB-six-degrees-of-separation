@@ -7,13 +7,6 @@ from collections import deque
 import time  
 class Graph:
 
-    def kontrollerVerdier(self) -> tuple:
-        return(int(len(list(chain(*self.hovedGraf.values())))/2), len(self.hovedGraf.keys()))
-    
-    #Method for runtime optimalization
-    def hentVerdier(self) -> tuple:
-        return (int(self.kanter/2), self.noder)
-
     def __init__(self) -> None:
         self.actorDict =  {}
         self.filmDict = {}
@@ -21,12 +14,22 @@ class Graph:
         self.kanter = 0
         self.noder = 0
         self.currentVisitBoolean = True
+
+    #Returns nodes and edges in 
+    def kontrollerVerdier(self) -> tuple:
+        return(int(len(list(chain(*self.hovedGraf.values())))/2), len(self.hovedGraf.keys()))
+    
+    #Returns the stored values for edges and nodes, fast, but not safe. 
+    def hentVerdier(self) -> tuple:
+        return (int(self.kanter/2), self.noder)
+
+    
         
     def les(self, movies:str, actors:str) -> None:
         self.lesFilmer(movies)
         self.lesActors(actors)
          
-    def lesActors(self, filnavn: str) -> dict:
+    def lesActors(self, filnavn: str) -> None:
         #self.actorDict becomes key, value = actorId, ActorObject
         #Open file, read actors by id, name and movies played in
         #Create new Actor object from this, iterate over all movies played in, and add this object in the actors list in Movie. 
@@ -42,7 +45,7 @@ class Graph:
                         if title in self.filmDict:
                             self.filmDict[title].actors.append(skuespiller)
 
-    def lesFilmer(self, filnavn: str) -> dict:
+    def lesFilmer(self, filnavn: str) -> None:
         #creates self.filmDict a dictionary key,value = movieId, MovieObject
         try:
             assert len(self.actorDict) == 0
@@ -98,12 +101,9 @@ class Graph:
                         continue
                     print(" "*spaces + " "*i + "\\" )
     
-    #Makes it possible to search again without building graph again
-    #Originally changed all visited to True, however flipping of the global boolean saves a lot of time:
-    # around 0.4s (which gave 70% reduction in overall time for BFSfull and dijsktraSearch()
+    3
     def resettGraf(self):
         self.currentVisitBoolean = not self.currentVisitBoolean
-
     
     def lagActorFraId(self, nmIdStart:str,nmIdSlutt:str) -> tuple:
         for actor in self.hovedGraf.keys():
@@ -154,7 +154,7 @@ class Graph:
                         queue.append(naboer[0])
             print("finnes ingen vei")
 
-    
+    #Works very well, very fast and works with the same path several times in a role 
     def nyDijkstra(self, nmIdStart:str, nmIdSlutt:str) -> None:
         
         actors = self.lagActorFraId(nmIdStart, nmIdSlutt)
@@ -169,7 +169,9 @@ class Graph:
         while len(que) > 0:
 
             poppetNode = que.popleft()
-            if poppetNode.totalWeight + 0.8 > sluttNode.totalWeight:
+            #Since the lowest possible resistance is 10-9.2 = 0.8; n = 0.8 is the safe number
+            #But for runtimeflex put n = 2.6 
+            if poppetNode.totalWeight+ 2.6> sluttNode.totalWeight:   
                 continue
 
             for tuples in self.hovedGraf[poppetNode]:
@@ -179,16 +181,17 @@ class Graph:
                     kopi.totalWeight = round(poppetNode.totalWeight + (10-tuples[1].rating), 1)  #Have to add this because python cant do 1.6 + 2.7 correct....
                     kopi.forrige = poppetNode
                     kopi.movieWithLast = tuples[1]    
-                    kopi.visited = self.currentVisitBoolean       
-                    que.append(kopi)
+                    kopi.visited = self.currentVisitBoolean  
+                    que.append(kopi) 
                     priorityuQue[int((kopi.totalWeight)*10)].append(kopi)
-
+        
         #Sjekk <3  
         while any(priorityuQue):
             #Remove first item
             for dq in priorityuQue:
                 if dq:
                     popNode = dq.popleft()
+                    
                     break
         
             if popNode == sluttNode:
@@ -202,9 +205,10 @@ class Graph:
                 self.printGrafSti(pathList)
                 self.resettGraf()
                 print(f"Total weight: {popNode.totalWeight}\n")
+                """ for actors in self.hovedGraf.keys():
+                    actors.totalWeight = 100 """
                 return
-            
-
+            popNode.totalWeight = 10
 
 
 
