@@ -15,25 +15,24 @@ class Graph:
         self.noder = 0
         self.currentVisitBoolean = True
 
-    #Returns nodes and edges in 
+    #Returns nodes and edges actually in self.hovedGraf. Safe, but not fast
     def kontrollerVerdier(self) -> tuple:
         return(int(len(list(chain(*self.hovedGraf.values())))/2), len(self.hovedGraf.keys()))
     
     #Returns the stored values for edges and nodes, fast, but not safe. 
     def hentVerdier(self) -> tuple:
         return (int(self.kanter/2), self.noder)
-
     
-        
+    #Simplifying external use of reading from file
     def les(self, movies:str, actors:str) -> None:
         self.lesFilmer(movies)
         self.lesActors(actors)
-         
+
+    #self.actorDict becomes key, value = actorId, ActorObject
     def lesActors(self, filnavn: str) -> None:
-        #self.actorDict becomes key, value = actorId, ActorObject
         #Open file, read actors by id, name and movies played in
         #Create new Actor object from this, iterate over all movies played in, and add this object in the actors list in Movie. 
-        with open(filnavn) as fil:
+        with open(filnavn, encoding="utf-8") as fil:
             for linje in fil:
                 if linje:
                     self.noder +=1
@@ -45,21 +44,22 @@ class Graph:
                         if title in self.filmDict:
                             self.filmDict[title].actors.append(skuespiller)
 
+    #creates self.filmDict a dictionary key,value = movieId, MovieObject
     def lesFilmer(self, filnavn: str) -> None:
-        #creates self.filmDict a dictionary key,value = movieId, MovieObject
         try:
             assert len(self.actorDict) == 0
         except: 
             print("lesActors must be run befor lesFilmer")
     
-        with open(filnavn, 'r') as fil:
+        with open(filnavn, encoding="utf-8") as fil:
             for linje in fil:
                 if linje:
                     linjeL = linje.strip().split("\t")
                     self.filmDict[linjeL[0]] = Movie(linjeL[0], linjeL[1], float(linjeL[2]))
 
+    #creates self.hovedGraf: key,value = ActorObject, ListOfTuples -> [(ActorObject, MovieObject), ..., ...,]
     def lagGraf(self) -> None:
-        #creates self.hovedGraf: key,value = ActorObject, ListOfTuples -> [(ActorObject, MovieObject), ..., ...,]
+        
         self.hovedGraf = {k:[] for k in self.actorDict.values()}
         for movie in self.filmDict.values():
             filmListe = []
@@ -71,6 +71,7 @@ class Graph:
                 self.kanter += len(filmListe)
                 filmListe.append((actor, movie))
 
+    #Makes visual print of the path
     def printGrafSti(self, pathList:list) -> None:
         print("=" *35)
         for index, actor in enumerate(pathList):
@@ -80,31 +81,32 @@ class Graph:
 
             if index == len(pathList)-1:
                 if isRightSide:
-                    print(" " *20 , actor, actor.totalWeight)
+                    print(" " *20 , actor)
                     return print("="* (21 + len(actor.name)))       
                 if not isRightSide:
                     print(actor, actor.totalWeight)
                     return print("="* (21 + len(actor.name)))         
 
             if isRightSide:
-                print(" " *20 , actor, actor.totalWeight)
+                print(" " *20 , actor)
                 for i in range(0, 20, 2):
                     if i == 10:
                         print(" "* (16-i+spaces-int(len(pathList[indexOf(pathList, actor)+1].movieWithLast.name)/2)), pathList[indexOf(pathList, actor)+1].movieWithLast)
                         continue
                     print(" "* (20-i) + " "*spaces + "/")         
             else:
-                print(actor, actor.totalWeight)
+                print(actor)
                 for i in range(0, 20, 2):
                     if i == 10:
                         print(" "* (16-i+spaces-int(len(pathList[indexOf(pathList, actor)+1].movieWithLast.name)/2)), pathList[indexOf(pathList, actor)+1].movieWithLast)
                         continue
                     print(" "*spaces + " "*i + "\\" )
     
-    3
+    #"Resets" graph so BFSfull or nyDijkstra can be run back to back on the same graph
     def resettGraf(self):
         self.currentVisitBoolean = not self.currentVisitBoolean
     
+    #Finds the actual actor objects that correspond to input ids.
     def lagActorFraId(self, nmIdStart:str,nmIdSlutt:str) -> tuple:
         for actor in self.hovedGraf.keys():
             #Both if in case start and end is the same

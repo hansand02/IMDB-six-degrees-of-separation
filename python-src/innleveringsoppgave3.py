@@ -45,15 +45,12 @@ if __name__ == "__main__":
             oppgave2.BFSfull("nm0031483","nm0931324")  
 
         def searchWeighted(): 
-            oppgave2.nyDijkstra("nm2255973","nm0000460")  
-            oppgave2.nyDijkstra("nm2255973","nm0000460")  
-            oppgave2.nyDijkstra("nm2255973","nm0000460")  
-            oppgave2.nyDijkstra("nm2255973","nm0000460")  
-            """ oppgave2.nyDijkstra("nm0424060","nm0000243")  
+            oppgave2.nyDijkstra("nm2255973","nm0000460")   
+            oppgave2.nyDijkstra("nm0424060","nm0000243")  
             oppgave2.nyDijkstra("nm4689420","nm0000365")  
             oppgave2.nyDijkstra("nm0000288","nm0001401") 
-            oppgave2.nyDijkstra("nm0031483","nm0931324")   """
-        
+            oppgave2.nyDijkstra("nm0031483","nm0931324")  
+            #oppgave2.nyDijkstra("nm0424216", "nm0697611" )
              
              
              
